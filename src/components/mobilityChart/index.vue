@@ -142,7 +142,8 @@ export default {
             myChart.resize();
         })
 
-    }
+    },
+    
 }
 </script>
 
