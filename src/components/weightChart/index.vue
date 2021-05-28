@@ -4,7 +4,7 @@
 
 <script>
 import {mapGetters} from "vuex"
-import {getMapDate} from '@/api/index'
+import {getEconomicDate} from '@/api/index'
 export default {
     computed:{
         ...mapGetters(['name','economicDate','weight_option','weight_myChart'])
@@ -24,7 +24,7 @@ export default {
     methods:{
         // 发起请求获取数据,同时对数据进行处理
          async getEconomicDate(){
-           let res = await getMapDate()
+           let res = await getEconomicDate()
            this.$store.commit('weight/geteConomicDate',res)
            console.log(2,this.economicDate);
            this.economicDate.data.soecorela.forEach(element => {

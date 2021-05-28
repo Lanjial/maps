@@ -11,7 +11,11 @@ const getters = {
     economicDate: state => state.weight.economicDate,
     weight_option: state => state.weight.weight_option,
     weight_myChart: state => state.weight.weight_myChart,
-    name:state => state.weight.name,
+
+    // Mobility
+    mobility: state => state.mobility.mobility,
+    mobility_option: state => state.mobility.mobility_option,
+    mobility_myChart: state => state.mobility.mobility_myChart,
   }
 
   export default getters
