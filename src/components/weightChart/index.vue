@@ -3,43 +3,53 @@
 </template>
 
 <script>
-import Socio_Economic from "../../../static/Socio_Economic.json"
+import {mapGetters} from "vuex"
+import {getMapDate} from '@/api/index'
 export default {
+    computed:{
+        ...mapGetters(['name','economicDate','weight_option','weight_myChart'])
+    },
     data(){
         return{
-            
+            // 经济指标
+            economicIndicators:[],
+            xAxisData:[],
+            data1:[],
+            data2:[],
+            data3:[],
+            data4:[],
+            emphasisStyle:{},
         }
     },
-    mounted(){
-         let myChart = this.$echarts.init(document.getElementById('weight'));
-
+    methods:{
+        // 发起请求获取数据,同时对数据进行处理
+         async getEconomicDate(){
+           let res = await getMapDate()
+           this.$store.commit('weight/geteConomicDate',res)
+           console.log(2,this.economicDate);
+           this.economicDate.data.soecorela.forEach(element => {
+                this.economicIndicators.push(element['Relativity Value']);
+                this.xAxisData.push(element['Socio-Economic indicators name']);
+            });
+            this.getweightChart()
+            this.Chart()
+         },
         // 指定图表的配置项和数据
-        var xAxisData = [];
-        var data1 = [];
-        var data2 = [];
-        var data3 = [];
-        var data4 = [];
-        var data_set_from_json = [];
-        // console.log(Socio_Economic_Relativity.soecorela[0]['Relativity Value'])
-        Socio_Economic.soecorela.forEach(element => {
-            data_set_from_json.push(element['Relativity Value']);
-            xAxisData.push(element['Socio-Economic indicators name']);
-        });
-        var emphasisStyle = {
+        getweightChart(){
+            this.emphasisStyle = {
             itemStyle: {
                 shadowBlur: 10,
                 shadowColor: 'rgba(0,0,0,0.3)'
             }
-        };
-
-        let option = {
+            };
+            let option = {
             title: {
                 left: 'center',
                 text: 'Weight of 20-socio-Economic Indicators',
             },
             tooltip: {},
             xAxis: {
-                data: xAxisData,
+                data: this.xAxisData,
                 name: 'X Axis',
                 show: false,
                 axisLine: { onZero: true },
@@ -70,9 +80,9 @@ export default {
                     name: 'bar',
                     type: 'bar',
                     stack: 'one',
-                    emphasis: emphasisStyle,
+                    emphasis: this.emphasisStyle,
                     // data: data1,
-                    data: data_set_from_json,
+                    data: this.economicIndicators,
                     barWidth: 20,
                     barMinHeight: 2,
 
@@ -92,38 +102,48 @@ export default {
                     name: 'bar2',
                     type: 'bar',
                     stack: 'one',
-                    emphasis: emphasisStyle,
-                    data: data2
+                    emphasis:this.emphasisStyle,
+                    data: this.data2
                 },
                 {
                     name: 'bar3',
                     type: 'bar',
                     stack: 'two',
-                    emphasis: emphasisStyle,
-                    data: data3
+                    emphasis: this.emphasisStyle,
+                    data: this.data3
                 },
                 {
                     name: 'bar4',
                     type: 'bar',
                     stack: 'two',
-                    emphasis: emphasisStyle,
-                    data: data4
+                    emphasis: this.emphasisStyle,
+                    data: this.data4
                 }
             ]
-        };
-
-        // 使用刚指定的配置项和数据显示图表。
-        myChart.setOption(option);
-
-        // 把配置项给实例对象，跟着浏览器同比例缩放
-        window.addEventListener('resize', function() {
-            myChart.resize();
-        })
-
+            };
+            this.$store.commit('weight/getWeight_option',option)
+        },
+        // 图标接受数据开始渲染
+        Chart(){
+            // 使用刚指定的配置项和数据显示图表。
+            this.weight_myChart.setOption(this.weight_option);
+            // 把配置项给实例对象，跟着浏览器同比例缩放
+            window.addEventListener('resize', function() {
+                myChart.resize();
+            })
+        }
+    },
+    mounted(){
+        // console.log(2,this.economicDate);
+        this.$store.state.weight.name = 'jia'
+        console.log(this.name);
+        let myChart = this.$echarts.init(document.getElementById('weight'));
+        this.$store.commit('weight/getWeight_myChart',myChart)
+        this.getEconomicDate()
+    },
     
-     
-    }
     
+
 }
 </script>
 

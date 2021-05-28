@@ -4,6 +4,7 @@ import getters  from "./getters "
 import mapbox from "./modules/mapbox"
 import horizhist from "./modules/horizhist"
 import Linetrend from "./modules/Linetrend"
+import weight from "./modules/weight"
 Vue.use(Vuex)
 
 const state = {
@@ -109,6 +110,7 @@ const store = new Vuex.Store({
     mapbox,
     horizhist,
     Linetrend,
+    weight,
   },
   getters
 })

@@ -9,6 +9,7 @@ import mapboxgl from "mapbox-gl";
 import { mapState } from 'vuex';
 import Exports from "../../../static/Export_Output.json"
 import Cases_Number_Monthly from "../../../static/Cases_Number_Monthly.json"
+import {getMapDate} from '@/api/index.js';
 export default {
   name: "mapbox",
   computed:{
@@ -16,7 +17,7 @@ export default {
   },
   data() {
     return {
-
+        Exports:"",
     };
   },
   methods:{
@@ -38,9 +39,21 @@ export default {
             window.relation_between_area_colorlist[element.properties.name] = window.colorList.indexOf(window.colorList[element.properties.id])
         });
 
+      },
+      async getMapDates(){
+        //   let ex = await getMapDate()
+        //   console.log(ex);
+        this.$axios.get("json/beijing.json").then((res) => {
+              console.log("'succsss",res.data);
+              console.log(Exports);
+            // this.Exports = re
+        }).catch((err) => {
+              console.log(err);
+        });
       }
   },
   created(){
+    this.getMapDates()
     this.windowDateHandle()
     this.$store.commit('getGeojsoninfo', Exports)
   },

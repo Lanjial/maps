@@ -6,15 +6,15 @@ Vue.use(VueRouter)
 
 const routes = [
   {
-    path: '/',
+    path: '/index',
     name: 'index',
     component: () => import("../views/index.vue")
   },
-  // {
-  //   path: '/indexs',
-  //   name: 'indexs',
-  //   component: () => import("../views/indexs.vue")
-  // },
+  {
+    path: '/',
+    name: 'test',
+    component: () => import("../views/test.vue")
+  },
 ]
 
 const router = new VueRouter({

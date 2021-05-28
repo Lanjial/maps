@@ -9,8 +9,8 @@
             <div v-for="(item,index) in exports" :key="index" class="option">
             <span :style="`background-color:${item.properties.color}`"></span>
             {{item.properties.name}}
+            </div>
         </div>
-    </div>
         </div>
       </div>
       <div class="map_ri">
