@@ -19,8 +19,9 @@ const state = {
   data_set_from_json:[],
   date_set_from_json:[],
   TownName_set_from_json:[],
+  name:'亚斯拉蒂',
   
-  // case部分的全局数据
+  // mapbox部分的全局数据
   raw_geojson_info:[],
   raw_default_area_list:[],
   geojson_info:new Array(),
@@ -88,9 +89,7 @@ const mutations = {
         })
     });
   // 名字与日期一一对应
-  
-
-},
+  },
   // mapbox的SetFeatureState事件
   setFeatureState(state,val){
     map.setFeatureState({

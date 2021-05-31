@@ -13,3 +13,10 @@ export function getMobility(){
         url:'json/Mobility.json'
     })
 }
+
+// 获取每日数量
+export function getMonthlyCases(){
+    return request({
+        url:'json/Cases_Number_Monthly.json'
+    })
+}

@@ -1,10 +1,9 @@
 const getters = {
     // sidebar: state => state.app.sidebar,
     // horizhist
-    horizhist_data_set1_from_json: state => state.horizhist.horizhist_data_set1_from_json,
-    horizhist_colorlist: state => state.horizhist.horizhist_colorlist,
-    horizhist_colorlist_clear: state => state.horizhist.horizhist_colorlist_clear,
-    horizhist_arealist: state => state.horizhist.horizhist_arealist,
+    horizhistData: state => state.horizhist.horizhistData,
+    horizhist_option: state => state.horizhist.horizhist_option,
+    horizhist_myChart: state => state.horizhist.horizhist_myChart,
 
     // weight
     economicIndicators: state => state.weight.economicIndicators,
@@ -16,6 +15,7 @@ const getters = {
     mobility: state => state.mobility.mobility,
     mobility_option: state => state.mobility.mobility_option,
     mobility_myChart: state => state.mobility.mobility_myChart,
+    
   }
 
   export default getters

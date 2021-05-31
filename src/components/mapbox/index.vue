@@ -13,7 +13,7 @@ import {getMapDate} from '@/api/index.js';
 export default {
   name: "mapbox",
   computed:{
-      ...mapState(['Exports','hoveredStateId','geojson_info','area_chosen_state','hl_line_mark','colorList','colorList_clear','relation_between_area_colorlist'])
+      ...mapState(['Exports','hoveredStateId','geojson_info','area_chosen_state','hl_line_mark','colorList','colorList_clear','relation_between_area_colorlist','name'])
   },
   data() {
     return {
@@ -117,8 +117,13 @@ export default {
                 return true;
             }
         };
+        let setname = this.name
         // ----红点----
         map.on('load', function() {
+            this.$store.name = '阿拉德'
+            console.log('vuex获取的数据',this.colorList);
+            console.log('本地data获取的数据',this.name);
+            console.log('本地处理过后的数据',setname);
             map.addImage('pulsing-dot', pulsingDot, { pixelRatio: 2 });
             map.addSource('rwanda-provinces', {
                 'type': 'geojson',
@@ -171,6 +176,7 @@ export default {
             });
         window.map_muti_chosen_mark = false;
         window.mapboxDate = 'rwanda-provinces'
+        console.log('data',window.mapboxDate);
         //当用户将鼠标移到状态填充层上时，我们将更新状态填充层
         //鼠标下特性的状态。
         map.on('mousemove', 'rwanda-provinces', function(e) {
@@ -459,6 +465,7 @@ export default {
                 }
             });
         // //当鼠标离开状态填充层时，更新
+
         map.on('mouseleave', 'rwanda-provinces', function() {
                 if (!window.map_muti_chosen_mark) {
                     if (window.hl_line_mark != -1) {
@@ -549,7 +556,6 @@ export default {
                 hoveredStateId = null;
                 map.getCanvas().style.cursor = '';
             });
-        console.log('vuex获取的数据',this.colorList);
         // 操作lintrend
         // 鼠标移入时更新地图高亮状态
         window.linetrend_myChart.on('mousemove',function(param) {
@@ -925,16 +931,9 @@ export default {
                 }
             }
         });
-        })
-
-        
-
-
-
-
-
-        
+        })    
   },
+  
 };
 </script>
 <style scoped>
