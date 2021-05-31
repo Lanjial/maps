@@ -9,17 +9,18 @@ import mobility from "./modules/mobility"
 Vue.use(Vuex)
 
 const state = {
-  Exports:"",
+  monthlyCases:[],
   // 鼠标移入和选中后的移入的颜色
   colorList_clear:['rgba(255,73,51, 0.1)', 'rgba(52,152,219, 0.1)', 'rgba(244,208,63, 0.1)', 'rgba(108,52,131, 0.1)', 'rgba(255,140,51, 0.1)', 'rgba(46,204,113, 0.1)', 'rgba(41,128,185, 0.1)', 'rgba(51,183,255, 0.1)', 'rgba(51,78,255, 0.1)', 'rgba(203,51,255, 0.1)', 'rgba(148,49,38, 0.1)', 'rgba(194,53,49, 0.1)', 'rgba(47,69,84, 0.1)', 'rgba(97,160,168, 0.1)', 'rgba(212,130,101, 0.1)', 'rgba(145,199,174, 0.1)', 'rgba(116,159,131, 0.1)', 'rgba(202,134,34, 0.1)'],
   // 默认的颜色
   colorList:['rgba(255,73,51, 1)', 'rgba(52,152,219, 1)', 'rgba(244,208,63, 1)', 'rgba(108,52,131, 1)', 'rgba(255,140,51, 1)', 'rgba(46,204,113, 1)', 'rgba(41,128,185, 1)', 'rgba(51,183,255, 1)', 'rgba(51,78,255, 1)', 'rgba(203,51,255, 1)', 'rgba(148,49,38, 1)', 'rgba(194,53,49, 1)', 'rgba(47,69,84, 1)', 'rgba(97,160,168, 1)', 'rgba(212,130,101, 1)', 'rgba(145,199,174, 1)', 'rgba(116,159,131, 1)', 'rgba(202,134,34, 1)'],
   
+
   // 时间与名称的全局处理
   data_set_from_json:[],
   date_set_from_json:[],
   TownName_set_from_json:[],
-  name:'亚斯拉蒂',
+  
   
   // mapbox部分的全局数据
   raw_geojson_info:[],
@@ -90,14 +91,9 @@ const mutations = {
     });
   // 名字与日期一一对应
   },
-  // mapbox的SetFeatureState事件
-  setFeatureState(state,val){
-    map.setFeatureState({
-      source: 'rwanda-provinces',
-      id: state.hoveredStateId
-    }, {
-        hover: val
-    });
+  // 获取
+  getMonthlyCases(state,val){
+    state.monthlyCases = val
   }
 }
 

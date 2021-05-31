@@ -1,5 +1,7 @@
-const state = {
-
+  const state = {
+    mapboxData:[],
+    mapbox_option:[],
+    mapbox_myChart:[],
   }
   
   // getters
@@ -14,7 +16,15 @@ const state = {
   
   // mutations
   const mutations = {
-
+    getMapboxData(state,val){
+      state.mapboxData = val
+    },
+    getMapbox_option(state,val){
+        state.mapbox_option = val
+    },
+    getMapbox_myChart(state,val){
+        state.mapbox_myChart = val
+    },
   }
   
   export default {

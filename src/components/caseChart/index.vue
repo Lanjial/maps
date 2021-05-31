@@ -25,10 +25,10 @@ export default {
     methods:{
     // 发送请求，获取数据
     async getMonthlyCases(){
-        let horizhistDatas = await getMonthlyCases()
-        this.$store.commit('horizhist/getHorizhistData',horizhistDatas)
+        let {data} = await getMonthlyCases()
+        this.$store.commit('horizhist/getHorizhistData',data)
         // 时间与名称的全局数据处理
-        this.$store.commit('timeNameDataHandle',this.horizhistData.data);
+        this.$store.commit('timeNameDataHandle',this.horizhistData);
         this.dataTotalHandle();
     },
     // 对其中的值进行运算从而得出各个值得总数

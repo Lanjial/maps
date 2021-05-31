@@ -20,3 +20,11 @@ export function getMonthlyCases(){
         url:'json/Cases_Number_Monthly.json'
     })
 }
+
+// 获取输出数据
+export function getExportData(){
+    return request({
+        url:'json/Export_Output.json'
+    })
+}
+

@@ -18,7 +18,6 @@ const actions = {
 const mutations = {
     geteConomicDate(state,val){
         state.economicDate = val
-        console.log(1,val);
     },
     getWeight_option(state,val){
         state.weight_option = val
