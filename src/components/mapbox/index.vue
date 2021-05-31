@@ -6,28 +6,38 @@
 
 <script>
 import mapboxgl from "mapbox-gl";
-import { mapState } from 'vuex';
-import Exports from "../../../static/Export_Output.json"
-import Cases_Number_Monthly from "../../../static/Cases_Number_Monthly.json"
-import {getMapDate} from '@/api/index.js';
+import { mapState,mapGetters } from 'vuex';
+// import Cases_Number_Monthly from "../../../static/Cases_Number_Monthly.json"
+import { getExportData,getMonthlyCases } from '@/api/index.js';
 export default {
   name: "mapbox",
   computed:{
-      ...mapState(['Exports','hoveredStateId','geojson_info','area_chosen_state','hl_line_mark','colorList','colorList_clear','relation_between_area_colorlist','name'])
+      ...mapGetters(['mapboxData','mapbox_option','mapbox_myChart','horizhistData']),
+      ...mapState(['geojson_info','area_chosen_state','hl_line_mark','colorList','colorList_clear','relation_between_area_colorlist','monthlyCases'])
   },
   data() {
     return {
-        Exports:"",
+        hoveredStateId:null,
     };
   },
   methods:{
-      windowDateHandle(){
-        window.raw_geojson_info = Exports;
+    // 发送请求，获取数据
+    async getMapDates(){
+        let {data} = await getExportData()
+        let res = await getMonthlyCases()
+        this.$store.commit('mapbox/getMapboxData',data)
+        this.$store.commit('getMonthlyCases',res.data)
+        this.windowDateHandle()
+        this.mapboxRender()
+    },
+    // 全局数据处理
+    windowDateHandle(){
+        window.raw_geojson_info = this.mapboxData;
         window.raw_default_area_list = [];
-        window.geojson_info = new Array();
-        window.area_chosen_state = new Array();
-        window.relation_between_area_ID = new Array();
-        window.relation_between_area_colorlist = new Array();
+        window.geojson_info = [];
+        window.area_chosen_state = [];
+        window.relation_between_area_ID = [];
+        window.relation_between_area_colorlist = [];
         window.colorList = this.colorList
         window.colorList_clear = this.colorList_clear
         
@@ -39,34 +49,18 @@ export default {
             window.relation_between_area_colorlist[element.properties.name] = window.colorList.indexOf(window.colorList[element.properties.id])
         });
 
-      },
-      async getMapDates(){
-        //   let ex = await getMapDate()
-        //   console.log(ex);
-        this.$axios.get("json/beijing.json").then((res) => {
-              console.log("'succsss",res.data);
-              console.log(Exports);
-            // this.Exports = re
-        }).catch((err) => {
-              console.log(err);
-        });
-      }
-  },
-  created(){
-    this.getMapDates()
-    this.windowDateHandle()
-    this.$store.commit('getGeojsoninfo', Exports)
-  },
-  mounted() {
-    mapboxgl.accessToken = 'pk.eyJ1Ijoic3l4LS0tIiwiYSI6ImNrazZhOXUxdDAyMTQyb3AyYWl1YjZ3cHMifQ.fziHVOJ-trhLKQbWTyax3g';
-      let map = new mapboxgl.Map({
+    },
+    // mapbox图表渲染
+    mapboxRender(){
+        mapboxgl.accessToken = 'pk.eyJ1Ijoic3l4LS0tIiwiYSI6ImNrazZhOXUxdDAyMTQyb3AyYWl1YjZ3cHMifQ.fziHVOJ-trhLKQbWTyax3g';
+        let map = new mapboxgl.Map({
           container: 'map', // container id
           style: 'mapbox://styles/mapbox/streets-v11', // stylesheet location
           center: [98.41, 25.18],
           zoom: 7,
           zoom: 8
         });
-        let hoveredStateId = null
+        this.hoveredStateId = null
         // ----红点----
         let size = 200;
         //实现CustomLayerInterface在地图上绘制一个脉冲点图标
@@ -74,7 +68,6 @@ export default {
             width: size,
             height: size,
             data: new Uint8Array(size * size * 4),
-
             //当图层被添加到地图中时，获取地图画布的渲染上下文
             onAdd: function() {
                 let canvas = document.createElement('canvas');
@@ -82,7 +75,6 @@ export default {
                 canvas.height = this.height;
                 this.context = canvas.getContext('2d');
             },
-
             //在使用图标的每一帧之前调用一次
             render: function() {
                 let duration = 1000;
@@ -100,7 +92,6 @@ export default {
                 );
                 context.fillStyle = 'rgba(255, 100, 100, 1)';
                 context.strokeStyle = 'black';
-                // context.lineWidth = 2 + 4 * (1 - t);
                 context.lineWidth = 4;
                 context.fill();
                 context.stroke();
@@ -117,17 +108,14 @@ export default {
                 return true;
             }
         };
-        let setname = this.name
-        // ----红点----
+        let mapboxdata = this.mapboxData
+        let Cases_Number_Monthly = this.monthlyCases
+        // ----数据加载完成后执行----
         map.on('load', function() {
-            this.$store.name = '阿拉德'
-            console.log('vuex获取的数据',this.colorList);
-            console.log('本地data获取的数据',this.name);
-            console.log('本地处理过后的数据',setname);
             map.addImage('pulsing-dot', pulsingDot, { pixelRatio: 2 });
             map.addSource('rwanda-provinces', {
                 'type': 'geojson',
-                'data': Exports
+                'data': mapboxdata
                 // 数据源位置（后续修改为请求返回的数据）
             });
             // 给地图添加数据
@@ -136,7 +124,6 @@ export default {
                 'type': 'fill',
                 'source': 'rwanda-provinces',
                 'layout': {},
-
                 // 关于paint 设置3
                 "paint": {
                     "fill-color": ["get", 'color'],
@@ -174,12 +161,10 @@ export default {
                     "text-halo-width": 2,
                 },
             });
-        window.map_muti_chosen_mark = false;
-        window.mapboxDate = 'rwanda-provinces'
-        console.log('data',window.mapboxDate);
-        //当用户将鼠标移到状态填充层上时，我们将更新状态填充层
-        //鼠标下特性的状态。
-        map.on('mousemove', 'rwanda-provinces', function(e) {
+            window.map_muti_chosen_mark = false;
+            //当用户将鼠标移到状态填充层上时，我们将更新状态填充层
+            //鼠标下特性的状态。
+            map.on('mousemove', 'rwanda-provinces', function(e) {
                 if(!window.map_muti_chosen_mark){
                      if (window.hl_line_mark != e.features[0].properties.id) {
                         // 判断鼠标当前选中的是否与window.hl_line_mark相同
@@ -192,7 +177,6 @@ export default {
                         window.linetrend_myChart.setOption({ series: window.linetrend_option.series }, {
                             notMerge: false
                         });
-                        
                         window.horizhist_option = {
                             title: {
                                 top: '0%',
@@ -212,28 +196,21 @@ export default {
                                 axisLabel: {
                                     show: true,
                                     textStyle: {
-
                                         fontSize: '9'
                                     }
                                 },
                                 inverse: true
                             },
-
                             grid: {
                                 left: '11%',
                                 top: '8%',
                                 right: '10%',
                                 bottom: '10%',
-
-
                             },
                             series: [{
-
                                 type: 'bar',
                                 encode: {
-
                                     x: 'amount',
-
                                     y: 'townname'
                                 },
                                 // 为每个柱子给定颜色，不够的话开始循环
@@ -279,28 +256,21 @@ export default {
                                 axisLabel: {
                                     show: true,
                                     textStyle: {
-
                                         fontSize: '9'
                                     }
                                 },
                                 inverse: true
                             },
-
                             grid: {
                                 left: '11%',
                                 top: '8%',
                                 right: '10%',
                                 bottom: '10%',
-
-
                             },
                             series: [{
-
                                 type: 'bar',
                                 encode: {
-
                                     x: 'amount',
-
                                     y: 'townname'
                                 },
                                 // 为每个柱子给定颜色，不够的话开始循环
@@ -321,27 +291,27 @@ export default {
                         window.hl_line_mark = e.features[0].properties.id;
                          if (!area_chosen_state[e.features[0].id]) {
                             if (e.features.length > 0) {
-                                if (hoveredStateId) {
+                                if (this.hoveredStateId) {
                                     map.setFeatureState({
                                         source: 'rwanda-provinces',
-                                        id: hoveredStateId
+                                        id: this.hoveredStateId
                                     }, {
                                         hover: false
                                     });
                                 }
-                                hoveredStateId = e.features[0].id;
+                                this.hoveredStateId = e.features[0].id;
                                 map.setFeatureState({
                                     source: 'rwanda-provinces',
-                                    id: hoveredStateId
+                                    id: this.hoveredStateId
                                 }, {
                                     hover: true
                                 });
                             }
                             } else {
-                        if (hoveredStateId) {
+                        if (this.hoveredStateId) {
                                     map.setFeatureState({
                                         source: 'rwanda-provinces',
-                                        id: hoveredStateId
+                                        id: this.hoveredStateId
                                     }, {
                                         hover: false
                                     });
@@ -350,12 +320,14 @@ export default {
                 }
                 }
             });
-        // 鼠标点击后移动到地图的提示框中，鼠标的样式变回正常模式
-        map.on('mouseenter', 'rwanda-provinces', function() {
-                map.getCanvas().style.cursor = 'pointer';
-            });
-        //当点击事件发生在状态层的一个功能上，在点击的位置，从它的属性描述HTML。
-        map.on('click', 'rwanda-provinces', function(e) {
+            })
+            console.log(2,Cases_Number_Monthly);
+            // 鼠标点击后移动到地图的提示框中，鼠标的样式变回正常模式
+            map.on('mouseenter', 'rwanda-provinces', function() {
+                    map.getCanvas().style.cursor = 'pointer';
+                });
+            //当点击事件发生在状态层的一个功能上，在点击的位置，从它的属性描述HTML。
+            map.on('click', 'rwanda-provinces', function(e) {
                 for (let i = 0; i < window.linetrend_option.series.length - 1; i++) {
                     if (window.linetrend_option.series[i + 1].name == e.features[0].properties.name) {
                         if (area_chosen_state[e.features[0].id]) {
@@ -438,21 +410,21 @@ export default {
                 };
                 window.horizhist_myChart.setOption(window.horizhist_option);
                 if (!area_chosen_state[e.features[0].id]) {
-                    hoveredStateId = e.features[0].id;
+                    this.hoveredStateId = e.features[0].id;
                     map.setFeatureState({
                         source: 'rwanda-provinces',
-                        id: hoveredStateId
+                        id: this.hoveredStateId
                     }, {
                         hover: true
                     });
                     area_chosen_state[e.features[0].id] = true;
                     window.map_muti_chosen_mark = true;
-                    hoveredStateId = null;
+                    this.hoveredStateId = null;
                 } else {
-                    hoveredStateId = e.features[0].id;
+                    this.hoveredStateId = e.features[0].id;
                     map.setFeatureState({
                         source: 'rwanda-provinces',
-                        id: hoveredStateId
+                        id: this.hoveredStateId
                     }, {
                         hover: false
                     });
@@ -464,9 +436,8 @@ export default {
                     }
                 }
             });
-        // //当鼠标离开状态填充层时，更新
-
-        map.on('mouseleave', 'rwanda-provinces', function() {
+            // //当鼠标离开状态填充层时，更新
+            map.on('mouseleave', 'rwanda-provinces', function() {
                 if (!window.map_muti_chosen_mark) {
                     if (window.hl_line_mark != -1) {
                         for (let i = 0; i < window.linetrend_option.series.length - 1; i++) {
@@ -545,64 +516,59 @@ export default {
                     }
                 }
                 // 如果有选中则关闭默认的鼠标移动高亮地图功能
-                if (hoveredStateId) {
+                if (this.hoveredStateId) {
                     map.setFeatureState({
                         source: 'rwanda-provinces',
-                        id: hoveredStateId
+                        id: this.hoveredStateId
                     }, {
                         hover: false
                     });
                 }
-                hoveredStateId = null;
+                this.hoveredStateId = null;
                 map.getCanvas().style.cursor = '';
             });
-        // 操作lintrend
-        // 鼠标移入时更新地图高亮状态
-        window.linetrend_myChart.on('mousemove',function(param) {
-            console.log('鼠标移入');
-            console.log('1',param);
+            // 操作lintrend
+            // 鼠标移入时更新地图高亮状态
+            window.linetrend_myChart.on('mousemove',function(param) {
             let distID = window.geojson_info[param.seriesName];
-            console.log('2',distID);
             if (!area_chosen_state[distID]) {
-                console.log('3',area_chosen_state);
                 if (distID) {
-                    if (hoveredStateId) {
+                    if (this.hoveredStateId) {
                         // 设置要素的状态状态,对象会与要素的现有状态合并。
                         map.setFeatureState({
                             source: 'rwanda-provinces',
-                            id: hoveredStateId
+                            id: this.hoveredStateId
                         }, {
                             hover: false
                         });
                     }
-                    hoveredStateId = distID;
-                    console.log(hoveredStateId);
+                    this.hoveredStateId = distID;
+                    console.log(this.hoveredStateId);
                     map.setFeatureState({
                         source: 'rwanda-provinces',
-                        id: hoveredStateId
+                        id: this.hoveredStateId
                     }, {
                         hover: true
                     });
                 }
             }
         });
-        // 鼠标移出时回复正常
-        window.linetrend_myChart.on('mouseout', function(param) {
-            console.log('鼠标移出');
-            if (hoveredStateId) {
-                console.log('进入了');
+            // 鼠标移出时回复正常
+            window.linetrend_myChart.on('mouseout', function(param) {
+            if (this.hoveredStateId) {
                 map.setFeatureState({
                     source: 'rwanda-provinces',
-                    id: hoveredStateId
+                    id: this.hoveredStateId
                 }, {
                     hover: false
                 });
             }
-            hoveredStateId = null;
+            this.hoveredStateId = null;
             map.getCanvas().style.cursor = '';
         });
-        // 执行拖动事件
-        window.linetrend_myChart.on('datazoom', function(param) {
+            // 执行拖动事件
+            window.linetrend_myChart.on('datazoom', function(param) {
+            console.log(11,Cases_Number_Monthly);
             let xAxis = window.linetrend_myChart.getModel().option.xAxis[0];
             let start_current_data = '';
             let end_current_data = '';
@@ -697,16 +663,10 @@ export default {
                 window.horizhist_arealist = [];
 
                 for (let i = 0; i < data_set1_from_json.length; i++) {
-                    // color_list.push(window.colorList[window.geojson_info[data_set1_from_json[i][1]]])
-                    // window.horizhist_colorlist.push(window.colorList[window.geojson_info[data_set1_from_json[i][1]] - 1])
                     window.horizhist_colorlist.push(window.colorList[window.relation_between_area_colorlist[data_set1_from_json[i][1]]])
                     window.horizhist_arealist.push(data_set1_from_json[i][1])
-                        // console.log(window.colorList[window.geojson_info[data_set1_from_json[i][1]] - 1])
-                        // console.log(window.geojson_info[data_set1_from_json[i][1]])
                 }
-                // console.log(data_set1_from_json)
                 // 查看颜色的循序
-                // console.log(color_list)
 
                 window.horizhist_option = {
                     title: {
@@ -732,14 +692,11 @@ export default {
                         },
                         inverse: true
                     },
-
                     grid: {
                         left: '11%',
                         top: '8%',
                         right: '10%',
                         bottom: '10%',
-
-
                     },
                     series: [{
                         type: 'bar',
@@ -931,7 +888,10 @@ export default {
                 }
             }
         });
-        })    
+    }      
+    },
+  mounted() {
+      this.getMapDates()
   },
   
 };
